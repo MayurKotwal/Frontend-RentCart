@@ -1,20 +1,17 @@
 'use client';
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 const Logo = () => {
   const router = useRouter();
 
   return ( 
-    <Image
+    <div
       onClick={() => router.push('/')}
-      className="hidden md:block cursor-pointer" 
-      src="/images/logo.png" 
-      height="100" 
-      width="150" 
-      alt="Logo" 
-    />
+      className="hidden md:block cursor-pointer font-bold text-2xl text-rose-500 hover:text-rose-600 transition-colors"
+    >
+      RentCart
+    </div>
    );
 }
  

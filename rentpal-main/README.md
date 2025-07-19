@@ -32,7 +32,7 @@
     <img src="readme-images/logo.png" alt="Logo" width="288" height="80">
   </a>
 
-<h3 align="center">Rentpal</h3>
+<h3 align="center">RentCart</h3>
 
   <p align="center">
     

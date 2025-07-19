@@ -17,16 +17,12 @@ public class AuthenticationS {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
-	public String saveUser(UserCredentials credential) {
-		
-		if (repository.findByEmailId(credential.getEmailId()).isPresent()) {
-	        return "Email is already registered!";
-	    }
-		
-		credential.setPassword(passwordEncoder.encode(credential.getPassword()));
-		repository.save(credential);
-		return "User added to the System Successfully";
+	public String saveUser(UserCredentials user) {
+	    user.setPassword(passwordEncoder.encode(user.getPassword()));
+	    repository.save(user);  // throws DuplicateKeyException if email/phone exists
+	    return "User registered successfully";
 	}
+
 	
 	public List<UserCredentials> getAllUser() {
 	    return repository.findAll();

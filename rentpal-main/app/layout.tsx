@@ -15,7 +15,7 @@ import ClientOnly from './components/ClientOnly';
 import Footer from '@/app/components/footer/footer';
 
 export const metadata = {
-  title: 'Rentpal',
+  title: 'RentCart',
   description: 'Rent your stuff',
 }
 

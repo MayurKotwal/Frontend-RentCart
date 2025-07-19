@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import useRentModal from "@/app/hooks/useRentModal";
+import { useUser } from '@/app/providers/UserProvider';
 
 import Modal from "./Modal";
 import Counter from "../inputs/Counter";
@@ -30,6 +31,7 @@ enum STEPS {
 const RentModal = () => {
   const router = useRouter();
   const rentModal = useRentModal();
+  const { token } = useUser();
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(STEPS.CATEGORY);
@@ -89,17 +91,41 @@ const RentModal = () => {
 
     setIsLoading(true);
 
+    console.log("Submitting listing data:", data);
+    console.log("Current token:", token ? token.substring(0, 20) + "..." : "No token");
+
+    if (!token) {
+      toast.error("Please login to create a listing");
+      setIsLoading(false);
+      return;
+    }
+
     axios
-      .post("/api/listings", data)
-      .then(() => {
+      .post("/api/listings", data, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      .then((response) => {
+        console.log("Listing created successfully:", response.data);
         toast.success("Listing created!");
         router.refresh();
         reset();
         setStep(STEPS.CATEGORY);
         rentModal.onClose();
       })
-      .catch(() => {
-        toast.error("Something went wrong.");
+      .catch((error) => {
+        console.error("Error creating listing:", error);
+        console.error("Error response:", error.response);
+        console.error("Error message:", error.message);
+        
+        if (error.response && error.response.data && error.response.data.error) {
+          toast.error(error.response.data.error);
+        } else if (error.message) {
+          toast.error(`Error: ${error.message}`);
+        } else {
+          toast.error("Something went wrong. Please try again.");
+        }
       })
       .finally(() => {
         setIsLoading(false);

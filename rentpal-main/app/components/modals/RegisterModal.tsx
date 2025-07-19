@@ -1,154 +1,310 @@
 'use client';
 
-import axios from "axios";
-import { AiFillGithub } from "react-icons/ai";
-import { signIn } from "next-auth/react";
-import { FcGoogle } from "react-icons/fc";
 import { useCallback, useState } from "react";
 import { toast } from "react-hot-toast";
-import { 
-  FieldValues, 
-  SubmitHandler,
-  useForm
-} from "react-hook-form";
+import axios from "axios";
 
 import useLoginModal from "@/app/hooks/useLoginModal";
 import useRegisterModal from "@/app/hooks/useRegisterModal";
 
 import Modal from "./Modal";
-import Input from "../inputs/Input";
 import Heading from "../Heading";
-import Button from "../Button";
 
-const RegisterModal= () => {
+const RegisterModal = () => {
   const registerModal = useRegisterModal();
   const loginModal = useLoginModal();
   const [isLoading, setIsLoading] = useState(false);
 
-  const { 
-    register, 
-    handleSubmit,
-    formState: {
-      errors,
-    },
-  } = useForm<FieldValues>({
-    defaultValues: {
-      name: '',
-      email: '',
-      password: '',
-      phoneNumber: '',
-      firstName: '',
-      lastName: '',
-      gender: '',
-      dateOfBirth: '',
-      addressLine1: '',
-      addressLine2: '',
-      city: '',
-      state: '',
-      country: '',
-      postalCode: ''
-    },
-    mode: 'onBlur',
+  const [formData, setFormData] = useState({
+    username: "",
+    emailId: "",
+    password: "",
+    phoneNumber: "",
+    firstName: "",
+    lastName: "",
+    gender: "",
+    dateOfBirth: "",
+    address: {
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      state: "",
+      country: "",
+      postalCode: ""
+    }
   });
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    setIsLoading(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
-    // Validate all fields are present
-    const requiredFields = [
-      'name', 'email', 'password', 'phoneNumber', 'firstName', 'lastName', 'gender', 'dateOfBirth',
-      'addressLine1', 'addressLine2', 'city', 'state', 'country', 'postalCode'
-    ];
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+
+    if (name in formData.address) {
+      setFormData((prev) => ({
+        ...prev,
+        address: { ...prev.address, [name]: value }
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+    // Clear error message when user starts typing
+    if (errorMessage) {
+      setErrorMessage("");
+    }
+  };
+
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const validatePhone = (phone: string) => {
+    return /^\d{10}$/.test(phone);
+  };
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    setErrorMessage("");
+
+    // Validate required fields
+    const requiredFields = ["username", "emailId", "password", "phoneNumber", "firstName"];
     for (const field of requiredFields) {
-      if (!data[field]) {
-        toast.error(`Missing required field: ${field}`);
+      if (!formData[field as keyof Omit<typeof formData, 'address'>]) {
+        setErrorMessage(`Please fill in ${field === "emailId" ? "email" : field}.`);
         setIsLoading(false);
         return;
       }
     }
 
-    const payload = {
-      username: data.name,
-      emailId: data.email,
-      password: data.password,
-      phoneNumber: data.phoneNumber,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      gender: data.gender,
-      dateOfBirth: data.dateOfBirth,
-      address: {
-        addressLine1: data.addressLine1,
-        addressLine2: data.addressLine2,
-        city: data.city,
-        state: data.state,
-        country: data.country,
-        postalCode: data.postalCode
-      }
-    };
-
-    axios.post('http://localhost:8081/auth/register', payload)
-    .then(() => {
-      toast.success('Registered! Please login.');
-      registerModal.onClose();
-      loginModal.onOpen();
-    })
-    .catch((error) => {
-      if (error.response && error.response.status === 409) {
-        toast.error('Email already registered.');
-      } else if (error.response && error.response.data && error.response.data.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error('Registration failed.');
-      }
-    })
-    .finally(() => {
+    if (!validateEmail(formData.emailId)) {
+      setErrorMessage("Please enter a valid email address.");
       setIsLoading(false);
-    })
-  }
+      return;
+    }
+
+    if (!validatePhone(formData.phoneNumber)) {
+      setErrorMessage("Phone number must be exactly 10 digits.");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const payload = {
+        username: formData.username,
+        emailId: formData.emailId,
+        password: formData.password,
+        phoneNumber: formData.phoneNumber,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        gender: formData.gender,
+        dateOfBirth: formData.dateOfBirth,
+        address: formData.address
+      };
+
+      console.log("Sending registration payload:", payload);
+      
+      const response = await axios.post('http://localhost:8081/auth/register', payload);
+      console.log("Registration response:", response);
+      
+      toast.success('Registration successful! Please login.');
+      setIsLoading(false);
+      registerModal.onClose();
+      // Small delay to ensure modal closes before opening login
+      setTimeout(() => {
+        loginModal.onOpen();
+      }, 100);
+    } catch (error: any) {
+      console.error("Registration Error:", error);
+      console.error("Error response:", error.response);
+      console.error("Error message:", error.message);
+      
+      setIsLoading(false);
+      
+      if (error.response && error.response.status === 409) {
+        setErrorMessage('Email already registered.');
+      } else if (error.response && error.response.data && error.response.data.message) {
+        setErrorMessage(error.response.data.message);
+      } else if (error.response && error.response.data) {
+        setErrorMessage(error.response.data);
+      } else if (error.message) {
+        setErrorMessage(`Network error: ${error.message}`);
+      } else {
+        setErrorMessage('Registration failed. Please try again.');
+      }
+      
+      // Force re-render to show error message
+      setTimeout(() => {
+        setErrorMessage(prev => prev);
+      }, 100);
+    }
+  };
 
   const onToggle = useCallback(() => {
     registerModal.onClose();
     loginModal.onOpen();
-  }, [registerModal, loginModal])
+  }, [registerModal, loginModal]);
+
+  const requiredFields = [
+    "username",
+    "emailId",
+    "password",
+    "phoneNumber",
+    "firstName"
+  ];
 
   const bodyContent = (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
       <Heading
-        title="Welcome to Rentpal"
+        title="Welcome to RentCart"
         subtitle="Create an account!"
       />
-      <Input id="email" label="Email" disabled={isLoading} register={register} errors={errors} required />
-      <Input id="name" label="Username" disabled={isLoading} register={register} errors={errors} required />
-      <Input id="password" label="Password" type="password" disabled={isLoading} register={register} errors={errors} required />
-      <Input id="phoneNumber" label="Phone Number" disabled={isLoading} register={register} errors={errors} required />
-      <Input id="firstName" label="First Name" disabled={isLoading} register={register} errors={errors} required />
-      <Input id="lastName" label="Last Name" disabled={isLoading} register={register} errors={errors} required />
-      <Input id="gender" label="Gender" disabled={isLoading} register={register} errors={errors} required />
-      <Input id="dateOfBirth" label="Date of Birth" type="date" disabled={isLoading} register={register} errors={errors} required />
-      <Input id="addressLine1" label="Address Line 1" disabled={isLoading} register={register} errors={errors} required />
-      <Input id="addressLine2" label="Address Line 2" disabled={isLoading} register={register} errors={errors} required />
-      <Input id="city" label="City" disabled={isLoading} register={register} errors={errors} required />
-      <Input id="state" label="State" disabled={isLoading} register={register} errors={errors} required />
-      <Input id="country" label="Country" disabled={isLoading} register={register} errors={errors} required />
-      <Input id="postalCode" label="Postal Code" disabled={isLoading} register={register} errors={errors} required />
+      {errorMessage && (
+        <div className="text-red-500 text-sm mb-2 p-3 bg-red-50 border border-red-200 rounded-md">
+          {errorMessage}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {/* Main fields */}
+        {[
+          "username",
+          "emailId",
+          "password",
+          "phoneNumber",
+          "firstName",
+          "lastName"
+        ].map((field) => (
+          <div key={field} className="flex flex-col gap-2">
+            <label htmlFor={field} className="text-sm font-medium text-gray-700">
+              {field === "emailId" ? "Email" : field.charAt(0).toUpperCase() + field.slice(1)}
+            </label>
+            <input
+              type={field === "password" ? "password" : "text"}
+              id={field}
+              name={field}
+              value={formData[field as keyof Omit<typeof formData, 'address'>]}
+              onChange={handleChange}
+              required={requiredFields.includes(field)}
+              pattern={field === "phoneNumber" ? "\\d{10}" : undefined}
+              maxLength={field === "phoneNumber" ? 10 : undefined}
+              title={field === "phoneNumber" ? "Phone number must be exactly 10 digits" : ""}
+              disabled={isLoading}
+              className="
+                w-full
+                px-3
+                py-2
+                border
+                border-gray-300
+                rounded-md
+                focus:outline-none
+                focus:ring-2
+                focus:ring-rose-500
+                focus:border-transparent
+                disabled:opacity-70
+                disabled:cursor-not-allowed
+              "
+            />
+          </div>
+        ))}
+
+        {/* Gender dropdown */}
+        <div className="flex flex-col gap-2">
+          <label htmlFor="gender" className="text-sm font-medium text-gray-700">
+            Gender
+          </label>
+          <select
+            id="gender"
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
+            disabled={isLoading}
+            className="
+              w-full
+              px-3
+              py-2
+              border
+              border-gray-300
+              rounded-md
+              focus:outline-none
+              focus:ring-2
+              focus:ring-rose-500
+              focus:border-transparent
+              disabled:opacity-70
+              disabled:cursor-not-allowed
+            "
+          >
+            <option value="">Select</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        {/* Date of birth */}
+        <div className="flex flex-col gap-2">
+          <label htmlFor="dateOfBirth" className="text-sm font-medium text-gray-700">
+            Date of Birth
+          </label>
+          <input
+            type="date"
+            id="dateOfBirth"
+            name="dateOfBirth"
+            value={formData.dateOfBirth}
+            onChange={handleChange}
+            disabled={isLoading}
+            className="
+              w-full
+              px-3
+              py-2
+              border
+              border-gray-300
+              rounded-md
+              focus:outline-none
+              focus:ring-2
+              focus:ring-rose-500
+              focus:border-transparent
+              disabled:opacity-70
+              disabled:cursor-not-allowed
+            "
+          />
+        </div>
+
+        {/* Address fields */}
+        {["addressLine1", "addressLine2", "city", "state", "country", "postalCode"].map((field) => (
+          <div key={field} className="flex flex-col gap-2">
+            <label htmlFor={field} className="text-sm font-medium text-gray-700">
+              {field.charAt(0).toUpperCase() + field.slice(1)}
+            </label>
+            <input
+              type="text"
+              id={field}
+              name={field}
+              value={formData.address[field as keyof typeof formData.address]}
+              onChange={handleChange}
+              disabled={isLoading}
+              className="
+                w-full
+                px-3
+                py-2
+                border
+                border-gray-300
+                rounded-md
+                focus:outline-none
+                focus:ring-2
+                focus:ring-rose-500
+                focus:border-transparent
+                disabled:opacity-70
+                disabled:cursor-not-allowed
+              "
+            />
+          </div>
+        ))}
+      </form>
     </div>
-  )
+  );
 
   const footerContent = (
     <div className="flex flex-col gap-4 mt-3">
       <hr />
-      <Button 
-        outline 
-        label="Continue with Google"
-        icon={FcGoogle}
-        onClick={() => signIn('google')} 
-      />
-      <Button 
-        outline 
-        label="Continue with Github"
-        icon={AiFillGithub}
-        onClick={() => signIn('github')}
-      />
       <div 
         className="
           text-neutral-500 
@@ -169,7 +325,7 @@ const RegisterModal= () => {
         </p>
       </div>
     </div>
-  )
+  );
 
   return (
     <Modal
@@ -178,11 +334,11 @@ const RegisterModal= () => {
       title="Register"
       actionLabel="Continue"
       onClose={registerModal.onClose}
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit}
       body={bodyContent}
       footer={footerContent}
     />
   );
-}
+};
 
 export default RegisterModal;

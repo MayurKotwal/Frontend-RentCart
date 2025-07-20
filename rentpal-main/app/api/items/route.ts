@@ -107,7 +107,7 @@ export async function POST(request: Request) {
     console.log("Sending item payload to ItemService:", itemPayload);
 
     // Send to ItemService
-    const response = await axios.post('http://localhost:9090/items', itemPayload, {
+    const response = await axios.post('http://localhost:9091/items', itemPayload, {
       headers: {
         'X-USER-ID': finalUserData.emailId,
         'Content-Type': 'application/json'
@@ -141,7 +141,7 @@ export async function GET(request: Request) {
     const location = searchParams.get('location');
     const query = searchParams.get('query');
 
-    let url = 'http://localhost:9090/items';
+          let url = 'http://localhost:9091/items';
 
     // Build query parameters
     const params = new URLSearchParams();

@@ -23,3 +23,13 @@ export type SafeUser = Omit<
   updatedAt: string;
   emailVerified: string | null;
 };
+
+export interface Review {
+  id: string;
+  itemId: string;
+  userId: string;
+  comment: string;
+  rating: number;
+  timestamp: number;
+  userName?: string; // Optional field for display purposes
+}

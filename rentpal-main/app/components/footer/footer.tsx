@@ -31,7 +31,7 @@
 //     <footer style={footerStyle}>
 //       <div className="container mx-auto text-center">
 //       <div style={pinkLine}></div>
-//         <p>&copy; 2023 RentPal. All rights reserved.</p>
+//         <p>&copy; 2025 RentPal. All rights reserved.</p>
 //         <nav className="mt-2">
 //           {/* Dynamic Services Links */}
 //           <a style={linkStyle} href="#">Home</a>
@@ -238,7 +238,7 @@ export default function App() {
 
       {/* <!--Copyright section--> */}
       <div className="bg-black-200 p-6 text-center dark:bg-bl-700">
-        <span>© 2023 Copyright:</span>
+        <span>© 2025 Copyright:</span>
         <a
           className="font-semibold text-neutral-600 dark:text-neutral-400"
           href="https://github.com/shreyashkadam/rentpal"

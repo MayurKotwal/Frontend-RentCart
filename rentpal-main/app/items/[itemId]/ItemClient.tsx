@@ -8,6 +8,11 @@ import { useMemo } from "react";
 import Heading from "@/app/components/Heading";
 import Image from "next/image";
 import HeartButton from "@/app/components/HeartButton";
+import Button from "@/app/components/Button";
+import useBookingModal from "@/app/hooks/useBookingModal";
+import BookingModal from "@/app/components/modals/BookingModal";
+import ReviewSection from "@/app/components/ReviewSection";
+import DynamicRating from "@/app/components/DynamicRating";
 
 interface ItemClientProps {
   item: any;
@@ -19,6 +24,7 @@ const ItemClient: React.FC<ItemClientProps> = ({
   currentUser,
 }) => {
   const { getByValue } = useCountries();
+  const bookingModal = useBookingModal();
   // Handle location display - use direct location string if available
   const locationDisplay = item.locationValue || "Location not specified";
   const category = useMemo(() => {
@@ -98,6 +104,11 @@ const ItemClient: React.FC<ItemClientProps> = ({
                   <hr />
                 </>
               )}
+              
+              <ReviewSection 
+                itemId={item.id}
+                currentUser={currentUser}
+              />
             </div>
             
             <div className="order-first mb-10 md:order-last md:col-span-3">
@@ -121,7 +132,7 @@ const ItemClient: React.FC<ItemClientProps> = ({
                 <div className="p-4">
                   <div className="flex flex-row items-center justify-between font-semibold text-lg">
                     <div>Rating</div>
-                    <div>{item.rating || 0}/5 ⭐</div>
+                    <DynamicRating itemId={item.id} />
                   </div>
                 </div>
                 <hr />
@@ -133,11 +144,26 @@ const ItemClient: React.FC<ItemClientProps> = ({
                     </div>
                   </div>
                 </div>
+                <hr />
+                <div className="p-4">
+                  <Button
+                    disabled={!item.available}
+                    label={item.available ? "Book Now" : "Not Available"}
+                    onClick={bookingModal.onOpen}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      
+      <BookingModal
+        itemId={item.id}
+        itemTitle={item.title}
+        itemPrice={item.price}
+        itemImages={item.images || []}
+      />
     </Container>
   );
 };

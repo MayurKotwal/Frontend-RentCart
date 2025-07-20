@@ -35,7 +35,7 @@ export async function GET(
       throw new Error('Invalid ID');
     }
 
-    const response = await axios.get(`http://localhost:9090/items/${itemId}`);
+    const response = await axios.get(`http://localhost:9091/items/${itemId}`);
     
     // Transform the item to match frontend format
     const item = response.data;
@@ -104,7 +104,7 @@ export async function PUT(
 
     const body = await request.json();
     
-    const response = await axios.put(`http://localhost:9090/items/${itemId}`, body, {
+          const response = await axios.put(`http://localhost:9091/items/${itemId}`, body, {
       headers: {
         'X-USER-ID': userData.emailId,
         'Content-Type': 'application/json'
@@ -161,7 +161,7 @@ export async function DELETE(
       throw new Error('Invalid ID');
     }
 
-    await axios.delete(`http://localhost:9090/items/${itemId}`, {
+            await axios.delete(`http://localhost:9091/items/${itemId}`, {
       headers: {
         'X-USER-ID': userData.emailId
       }

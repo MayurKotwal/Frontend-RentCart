@@ -1,6 +1,6 @@
 export default async function getUserItems(userEmail: string) {
   try {
-    const res = await fetch(`http://localhost:9090/items/user/${encodeURIComponent(userEmail)}`, { 
+    const res = await fetch(`http://localhost:9091/items/user/${encodeURIComponent(userEmail)}`, { 
       cache: 'no-store' 
     });
     

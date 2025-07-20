@@ -92,6 +92,10 @@ const EditItemClient: React.FC<EditItemClientProps> = ({
 
   return (
     <div className="max-w-2xl mx-auto">
+      {/* Read-only Item ID display */}
+      <div className="mb-4 p-2 bg-gray-100 rounded text-xs text-gray-600 select-all">
+        <strong>Item ID:</strong> {item.id}
+      </div>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
         {/* Category Selection */}
         <div className="flex flex-col gap-4">

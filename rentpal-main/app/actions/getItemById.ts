@@ -1,6 +1,6 @@
 export default async function getItemById(itemId: string) {
   try {
-    const res = await fetch(`http://localhost:9090/items/${itemId}`, { cache: 'no-store' });
+    const res = await fetch(`http://localhost:9091/items/${itemId}`, { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch item');
     const item = await res.json();
     

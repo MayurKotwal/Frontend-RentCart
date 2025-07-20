@@ -25,7 +25,8 @@ enum STEPS {
   INFO = 2,
   IMAGES = 3,
   DESCRIPTION = 4,
-  PRICE = 5,
+  FEATURES = 5,
+  PRICE = 6,
 }
 
 const RentModal = () => {
@@ -35,6 +36,8 @@ const RentModal = () => {
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(STEPS.CATEGORY);
+  const [features, setFeatures] = useState<string[]>([]);
+  const [newFeature, setNewFeature] = useState("");
 
   const {
     register,
@@ -115,7 +118,7 @@ const RentModal = () => {
       category: data.category,
       location: data.location?.value || data.location,
       images: data.imageSrc ? [data.imageSrc] : [],
-      features: [],
+      features: features,
       usagePolicy: data.usagePolicy || "",
       securityDeposit: data.securityDeposit || 0,
       type: "RENT"
@@ -135,6 +138,8 @@ const RentModal = () => {
         router.refresh();
         reset();
         setStep(STEPS.CATEGORY);
+        setFeatures([]);
+        setNewFeature("");
         rentModal.onClose();
       })
       .catch((error) => {
@@ -293,6 +298,100 @@ const RentModal = () => {
           register={register}
           errors={errors}
         />
+      </div>
+    );
+  }
+
+  if (step === STEPS.FEATURES) {
+    bodyContent = (
+      <div className="flex flex-col gap-8">
+        <Heading
+          title="What features does your item have?"
+          subtitle="Add key features that make your item special"
+        />
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-2">
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                value={newFeature}
+                onChange={(e) => setNewFeature(e.target.value)}
+                placeholder="e.g., Wireless, 4K Display, etc."
+                disabled={isLoading}
+                className="
+                  peer
+                  w-full
+                  p-4
+                  pt-6 
+                  font-light 
+                  bg-white 
+                  border-2
+                  rounded-md
+                  outline-none
+                  transition
+                  disabled:opacity-70
+                  disabled:cursor-not-allowed
+                  pl-4
+                  border-neutral-300
+                  focus:border-black
+                "
+              />
+              <label className="
+                absolute 
+                text-md
+                duration-150 
+                transform 
+                -translate-y-3 
+                top-5 
+                z-10 
+                origin-[0] 
+                left-4
+                peer-placeholder-shown:scale-100 
+                peer-placeholder-shown:translate-y-0 
+                peer-focus:scale-75
+                peer-focus:-translate-y-4
+                text-zinc-400
+              ">
+                Add Feature
+              </label>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                if (newFeature.trim()) {
+                  setFeatures([...features, newFeature.trim()]);
+                  setNewFeature("");
+                }
+              }}
+              className="px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition mt-8"
+              disabled={isLoading || !newFeature.trim()}
+            >
+              Add
+            </button>
+          </div>
+          {features.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium">Added Features:</label>
+              <div className="flex flex-wrap gap-2">
+                {features.map((feature, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full"
+                  >
+                    <span className="text-sm">{feature}</span>
+                    <button
+                      type="button"
+                      onClick={() => setFeatures(features.filter((_, i) => i !== index))}
+                      className="text-red-500 hover:text-red-700 text-sm"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   }

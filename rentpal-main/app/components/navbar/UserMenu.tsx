@@ -114,8 +114,8 @@ const UserMenu: React.FC = () => {
                   onClick={() => router.push("/dashboard")}
                 />
                 <MenuItem
-                  label="My bookings"
-                  onClick={() => router.push("/bookings")}
+                  label="My Orders"
+                  onClick={() => router.push("/orders")}
                 />
                 <MenuItem
                   label="My favorites"

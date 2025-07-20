@@ -1,6 +1,5 @@
 import { SafeUser } from "@/app/types";
 
-import Categories from "./Categories";
 import Container from "../Container";
 import Logo from "./Logo";
 import Search from "./Search";
@@ -35,11 +34,29 @@ const Navbar: React.FC<NavbarProps> = ({
         >
           <Logo />
           <Search />
-          <UserMenu currentUser={currentUser} />
+          <div className="flex items-center gap-4">
+            <a 
+              href="/items" 
+              className="
+                hidden 
+                md:block 
+                text-sm 
+                font-semibold 
+                py-3 
+                px-4 
+                rounded-full 
+                hover:bg-neutral-100 
+                transition 
+                cursor-pointer
+              "
+            >
+              Browse Items
+            </a>
+            <UserMenu currentUser={currentUser} />
+          </div>
         </div>
       </Container>
     </div>
-    <Categories />
   </div>
   );
 }

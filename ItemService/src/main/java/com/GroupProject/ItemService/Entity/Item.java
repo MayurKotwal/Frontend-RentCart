@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-
 @Getter
 @Setter
 @ToString
@@ -62,7 +61,7 @@ public class Item {
     private List<@NotBlank String> features;
 
     @Field("available")
-    private boolean available = true;
+    private Boolean available = true;
 
     @NotBlank
     @Indexed
@@ -91,6 +90,15 @@ public class Item {
     @Field("securityDeposit")
     private double securityDeposit = 0.0;
 
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -115,6 +123,14 @@ public class Item {
         this.price = price;
     }
 
+    public double getInitialPrice() {
+        return initialPrice;
+    }
+
+    public void setInitialPrice(double initialPrice) {
+        this.initialPrice = initialPrice;
+    }
+
     public String getCategory() {
         return category;
     }
@@ -123,12 +139,44 @@ public class Item {
         this.category = category;
     }
 
+    public ItemType getType() {
+        return type;
+    }
+
+    public void setType(ItemType type) {
+        this.type = type;
+    }
+
+    public List<String> getFeatures() {
+        return features;
+    }
+
+    public void setFeatures(List<String> features) {
+        this.features = features;
+    }
+
+    public Boolean getAvailable() {
+        return available;
+    }
+
+    public void setAvailable(Boolean available) {
+        this.available = available;
+    }
+
     public String getUserId() {
         return userId;
     }
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public String getLocation() {
@@ -147,5 +195,27 @@ public class Item {
         this.images = images;
     }
 
+    public double getRating() {
+        return rating;
+    }
 
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
+
+    public String getUsagePolicy() {
+        return usagePolicy;
+    }
+
+    public void setUsagePolicy(String usagePolicy) {
+        this.usagePolicy = usagePolicy;
+    }
+
+    public double getSecurityDeposit() {
+        return securityDeposit;
+    }
+
+    public void setSecurityDeposit(double securityDeposit) {
+        this.securityDeposit = securityDeposit;
+    }
 }

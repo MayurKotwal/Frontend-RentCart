@@ -110,6 +110,10 @@ const UserMenu: React.FC = () => {
             {user ? (
               <>
                 <MenuItem
+                  label="My Dashboard"
+                  onClick={() => router.push("/dashboard")}
+                />
+                <MenuItem
                   label="My bookings"
                   onClick={() => router.push("/bookings")}
                 />

@@ -36,7 +36,9 @@ const ListingInfo: React.FC<ListingInfoProps> = ({
 }) => {
   const { getByValue } = useCountries();
 
-  const coordinates = getByValue(locationValue)?.latlng;
+  // For now, use default coordinates since we don't have latlng from string location
+  // In a real app, you'd want to geocode the location string to get coordinates
+  const coordinates = getByValue(locationValue)?.latlng || [20.5937, 78.9629]; // Default to India coordinates
 
   return (
     <div className="col-span-4 flex flex-col gap-8">

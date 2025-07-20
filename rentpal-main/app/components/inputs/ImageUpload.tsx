@@ -17,7 +17,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const [uploadError, setUploadError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = useCallback((file: File) => {
+  const handleFileSelect = useCallback(async (file: File) => {
     console.log("File selected:", file.name, file.size);
     
     // Validate file type
@@ -34,11 +34,30 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
     setUploadError("");
     
-    // Create a local URL for the image
-    const imageUrl = URL.createObjectURL(file);
-    onChange(imageUrl);
-    
-    console.log("Image uploaded successfully:", imageUrl);
+    try {
+      // Create FormData for upload
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Upload to server
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Upload failed');
+      }
+
+      const data = await response.json();
+      onChange(data.url);
+      
+      console.log("Image uploaded successfully:", data.url);
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      setUploadError(error.message || "Failed to upload image");
+    }
   }, [onChange]);
 
   const handleFileInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {

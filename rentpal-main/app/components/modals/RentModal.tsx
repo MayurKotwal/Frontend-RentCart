@@ -13,7 +13,7 @@ import { useUser } from '@/app/providers/UserProvider';
 import Modal from "./Modal";
 import Counter from "../inputs/Counter";
 import CategoryInput from "../inputs/CategoryInput";
-import CountrySelect from "../inputs/CountrySelect";
+import LocationInput from "../inputs/CountrySelect";
 import { categories } from "../navbar/Categories";
 import ImageUpload from "../inputs/ImageUpload";
 import Input from "../inputs/Input";
@@ -52,6 +52,8 @@ const RentModal = () => {
       price: 1,
       title: "",
       description: "",
+      securityDeposit: 0,
+      usagePolicy: "",
     },
   });
 
@@ -91,31 +93,52 @@ const RentModal = () => {
 
     setIsLoading(true);
 
-    console.log("Submitting listing data:", data);
-    console.log("Current token:", token ? token.substring(0, 20) + "..." : "No token");
+    console.log("Submitting item data:", data);
+    
+    // Use token from useUser hook, fallback to localStorage
+    const authToken = token || localStorage.getItem('authToken');
+    console.log("Token from useUser hook:", token ? token.substring(0, 20) + "..." : "No token from hook");
+    console.log("Token from localStorage:", localStorage.getItem('authToken') ? localStorage.getItem('authToken')?.substring(0, 20) + "..." : "No token in localStorage");
+    console.log("Final authToken:", authToken ? authToken.substring(0, 20) + "..." : "No final token");
 
-    if (!token) {
-      toast.error("Please login to create a listing");
+    if (!authToken) {
+      toast.error("Please login to create an item listing");
       setIsLoading(false);
       return;
     }
 
+    // Prepare item data according to Item.java POJO
+    const itemData = {
+      title: data.title,
+      description: data.description,
+      price: data.price,
+      category: data.category,
+      location: data.location?.value || data.location,
+      images: data.imageSrc ? [data.imageSrc] : [],
+      features: [],
+      usagePolicy: data.usagePolicy || "",
+      securityDeposit: data.securityDeposit || 0,
+      type: "RENT"
+    };
+
+    console.log("Sending item data:", itemData);
+
     axios
-      .post("/api/listings", data, {
+      .post("/api/items", itemData, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${authToken}`
         }
       })
       .then((response) => {
-        console.log("Listing created successfully:", response.data);
-        toast.success("Listing created!");
+        console.log("Item created successfully:", response.data);
+        toast.success("Item listed successfully!");
         router.refresh();
         reset();
         setStep(STEPS.CATEGORY);
         rentModal.onClose();
       })
       .catch((error) => {
-        console.error("Error creating listing:", error);
+        console.error("Error creating item:", error);
         console.error("Error response:", error.response);
         console.error("Error message:", error.message);
         
@@ -194,13 +217,13 @@ const RentModal = () => {
       <div className="flex flex-col gap-8">
         <Heading
           title="Where is your item located?"
-          subtitle="Help people find you!"
+          subtitle="Enter your location (city, area, or address)"
         />
-        <CountrySelect
+        <LocationInput
           value={location}
           onChange={(value) => setCustomValue("location", value)}
+          placeholder="e.g., Mumbai, Maharashtra or Bandra West, Mumbai"
         />
-        <Map center={location?.latlng} />
       </div>
     );
   }
@@ -262,6 +285,14 @@ const RentModal = () => {
           errors={errors}
           required
         />
+        <hr />
+        <Input
+          id="usagePolicy"
+          label="Usage Policy (Optional)"
+          disabled={isLoading}
+          register={register}
+          errors={errors}
+        />
       </div>
     );
   }
@@ -275,13 +306,23 @@ const RentModal = () => {
         />
         <Input
           id="price"
-          label="Price"
+          label="Price per day (Rs)"
           formatPrice
           type="number"
           disabled={isLoading}
           register={register}
           errors={errors}
           required
+        />
+        <hr />
+        <Input
+          id="securityDeposit"
+          label="Security Deposit (Rs) - Optional"
+          formatPrice
+          type="number"
+          disabled={isLoading}
+          register={register}
+          errors={errors}
         />
       </div>
     );

@@ -25,13 +25,14 @@ const ListingHead: React.FC<ListingHeadProps> = ({
 }) => {
   const { getByValue } = useCountries();
 
-  const location = getByValue(locationValue);
+  // Handle location display - use direct location string if available
+  const locationDisplay = locationValue || "Location not specified";
 
   return ( 
     <>
       <Heading
         title={title}
-        subtitle={`${location?.region}, ${location?.label}`}
+        subtitle={locationDisplay}
       />
       <div className="
           w-full
